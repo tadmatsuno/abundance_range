@@ -4,17 +4,20 @@ import matplotlib
 import pandas
 import numpy as np
 from scipy import stats
+from astropy.table import Table
 
 
 matplotlib.rcParams['font.size'] = 12
-all_element = ['Li','C','N','O','Mg',\
+all_element = ['Li','C','N','O','Na','Mg',\
                'Al','Si','Ca','Ti','V',
                'Cr','Mn','Ni','Co','Sr',
-               'Y','Zr','Ba','Ce','Eu']
+               'Y','Zr','Ba','Eu']
 
 sagamp = pandas.read_csv('./4MOST_investigate_abundancerange0209MP.tsv',sep='\t')
+sagamp_additional = {'Na':'./4MOST_investigate_abundancerange0209MP_Na.tsv'}
 sagamr = pandas.read_csv('./4MOST_investigate_abundancerange0209MR.tsv',sep='\t')
-
+sagamr_additional = {'Na':'./4MOST_investigate_abundancerange0209MR_Na.tsv'}
+#galah = Table.read('./GALAHDR3_snr50_spfeh_flags.fits')
 
 
 quantiles_print = [5,95]
@@ -22,9 +25,15 @@ quantiles_print = [5,95]
 def plot_one_axis(elem,ax,MP=False,ranges=None,SAGA=False,GALAH=False,APOGEE=False):
     if SAGA:
         if MP:
-            data = sagamp
+            if elem in sagamp_additional.keys():
+                data = pandas.read_csv(sagamp_additional[elem],sep='\t')
+            else:
+                data = sagamp
         else:
-            data = sagamr
+            if elem in sagamr_additional.keys():
+                data = pandas.read_csv(sagamr_additional[elem],sep='\t')
+            else:
+                data = sagamr
         col = f'[{elem}/Fe]'
         if 'Li' in elem:
             col = f'log-e(Li)'
@@ -54,6 +63,7 @@ def plot_one_axis(elem,ax,MP=False,ranges=None,SAGA=False,GALAH=False,APOGEE=Fal
                     f'{lpercentile:.1f}',color='k',verticalalignment='top',horizontalalignment='left')
             ax.text(xmin+0.05*(xmax-xmin),ranges[elem][1]+0.05*(ranges[elem][1]-ranges[elem][0]),
                     f'{upercentile:.1f}',color='k',verticalalignment='bottom',horizontalalignment='left')
+        
                     
 @solara.component
 def Page():
